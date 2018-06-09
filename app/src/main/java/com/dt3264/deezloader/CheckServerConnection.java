@@ -1,13 +1,9 @@
-package com.yourorg.sample;
+package com.dt3264.deezloader;
 
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
