@@ -1,33 +1,20 @@
-# DeezLoader Reborn V3.1.2 Unofficial For Android
+# Releases
+Which version should I download?
 
-Thanks to the power of the recent [Node.js for Mobile Apps](https://github.com/janeasystems/nodejs-mobile). I'm glad to present to you the adapted version of [DeezLoader Reborn](https://gitlab.com/Monsterwolf/DeezLoader-Reborn) for Android!
-Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoader-Reborn#how-to-run-on-android) to run this tool, just download the [release apk](https://gitlab.com/DT3264/DeezLoader-Android/release) for your specific architecture and start to enjoying of this app natively in your device.
+To know which version you should downlaod, install this app from google play
+[Droid Hardware Info](https://play.google.com/store/apps/details?id=com.inkwired.droidinfo)
 
-**Telegram News Channel** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
+Once installed, open the app and head to System tab. From this tab, take note of two fields – CPU Architecture and Instruction Sets<br>
+![Screenshot](https://i.imgur.com/FkFtz8G.jpg)</br>
 
+#arm64
+If it is "AArch-64"
 
-# Features
-- Same as the desktop version
-- But adapted for the small screens
+#armeabi-v7a
+If it is like "armeabi", "Thumb-2" or "VFPv3-D16"
 
-# How to use it
-- Download the apk from [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/app/release)
-- Install it (allow permission to install apks from external sources in case is not allowed)
-- Open the deezloader app and wait to the server to start
-- Ready.
+#x86
+if it is like "x86 (IA-32)"", "MMX", "SSE/2/3" or "SSSE3"
 
-
-# Credits
-## Original Developer
-[ZzMTV](https://boerse.to/members/zzmtv.3378614/)
-## Past Maintainers
-[ExtendLord](https://github.com/ExtendLord)<br/>
-[ParadoxalManiak](https://github.com/ParadoxalManiak)<br/>
-[snwflake](https://github.com/snwflake)
-
-**No longer maintained by ZzMTV, ExtendLord,ParadoxalManiak or snwflake**
-
-# Disclaimer
-- I am not responsible for the usage of this program by other people.
-- I do not recommend you doing this illegally or against Deezer's terms of service.
-- This project is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+#"x86_64"
+or if it is like "SSE4.1, 4.2" or "POPCNT"
