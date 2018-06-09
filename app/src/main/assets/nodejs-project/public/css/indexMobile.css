@@ -1,0 +1,91 @@
+body{
+    overflow-x: hidden;
+}
+.jumbotron{
+    padding-bottom: 0;
+}
+.clear-nav{
+    padding: 0;
+}
+.container{
+    margin: 0;
+    max-width: inherit;
+    width: 97%;
+    margin-left: 6px;
+}
+.tab-wrapper{
+    margin: 0;
+}
+#tab_search_form_search{
+    margin: 0;
+}
+td>img{
+    display: inherit;
+    float: left;
+}
+td>.floatRight{
+    float: right;
+}
+.fadeInUp > td{
+    padding: 0;
+    padding-left: 6px;
+    border-bottom: 1px solid black;
+}
+.centrado{
+    text-align: center;
+}
+
+.modal-content>.row{
+    margin-bottom: 0;
+}
+
+.modal-content{
+    overflow: hidden;
+}
+
+.modal h4{
+    margin: 0;
+}
+
+.modal .valign-wrapper{
+    padding-left: 40%;
+}
+.imgArtista, .imgPlay, .imgChart{
+    width: 27%;
+    float: left;
+}
+.detallesArtist, .detallesPlay, .detallesChart{
+    padding-top: 10px;
+}
+
+
+.modal_trackList .modal-content{
+    padding: 10px;
+}
+#modal_trackList, #modal_trackListSelective, #modal_settings, #modal_about{
+    max-height: inherit;
+    height: 85%;
+}
+.mainTab{
+    overflow-y: hidden!important;
+    overflow-x: auto!important;
+}
+#tab_search_form_search label{
+    padding-left: 22px;
+}
+.tabs .tab a.active{
+    color: blueviolet;
+}
+.noMargin{
+    margin-bottom: 0;
+}
+#tab_charts_table_charts thead{
+    display: none;
+}
+#rememberCheck{
+    text-align: center;
+}
+#modal_login_btn_login, #modal_login_btn_signup{
+    width: 100%;
+    margin-top: 10px;
+}
