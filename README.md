@@ -9,11 +9,8 @@ Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoa
 - Same as the desktop version
 - But adapted for the small screens
 
-# How to use it
-- Download the apk from [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/app/release)
-- Install it (allow permission to install apks from external sources in case is not allowed)
-- Open the deezloader app and wait to the server to start
-- Ready.
+# Downloads
+- Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/app/release)
 
 # Things coming in the future
 - Notification when a song is being downloaded
