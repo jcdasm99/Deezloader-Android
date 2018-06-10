@@ -133,8 +133,7 @@ function aldecrypt(encoded) {
 
 // START sockets clusterfuck
 io.sockets.on('connection', function (socket) {
-	// change version
-	socket.emit('version', packagejson.version)
+	//socket.emit('version', packagejson.version)
 	socket.downloadQueue = [];
 	socket.currentItem = null;
 	socket.lastQueueId = null;
@@ -147,6 +146,9 @@ io.sockets.on('connection', function (socket) {
 				Deezer.logs('Info',"Outdated version, the latest is "+body.split("\n")[0]);
 			}
 		}
+	});
+	socket.on('sendProgress', function(progress){
+		io.sockets.emit('progressData', progress);
 	});
 	socket.on("login", function (username, password, autologin) {
 		Deezer.init(username, password, function (err) {
@@ -196,7 +198,7 @@ io.sockets.on('connection', function (socket) {
 		return;
 	});
 
-	let lastPercent=0;
+	let lastPercentage=100;
 	Deezer.onDownloadProgress = function (track, progress) {
 		if (!track.trackSocket) {
 			return;
@@ -219,11 +221,6 @@ io.sockets.on('connection', function (socket) {
 				}
 			}
 			let percentage = (progress / complete) * 100;
-			if(lastPercent!=parseInt(percentage)){
-				//toLog
-				lastPercent = parseInt(percentage)
-				console.log(parseInt(percentage) + " %");
-			}
 
 			if ((percentage - track.trackSocket.currentItem.percentage > 1) || (progress == complete)) {
 				track.trackSocket.currentItem.percentage = percentage;
@@ -938,6 +935,7 @@ io.sockets.on('connection', function (socket) {
 						}
 					}
 					Deezer.logs('Info','Downloading file to ' + writePath);
+					io.sockets.emit('pathToDownload', writePath);
 					if (fs.existsSync(writePath)) {
 						Deezer.logs('Info',"Already downloaded: " + metadata.artist + ' - ' + metadata.title);
 						callback();

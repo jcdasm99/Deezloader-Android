@@ -794,12 +794,17 @@ socket.on('updateQueue', function (data) {
 
 });
 
+//toLog
+var lastPercentage = 100;
 socket.on("downloadProgress", function (data) {
 	//data.queueId -> id (string)
 	//data.percentage -> float/double, percentage
 	//updated in 1% steps
 
 	$('#' + data.queueId).find('.determinate').css('width', data.percentage + '%');
+	if(parseInt(data.percentage)!=lastPercentage)
+		lastPercentage = parseInt(data.percentage);
+	socket.emit("sendProgress", lastPercentage);
 
 });
 
