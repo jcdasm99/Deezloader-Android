@@ -5,6 +5,9 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +25,12 @@ import android.content.res.AssetManager;
 import android.widget.Toast;
 
 import java.io.*;
+import java.net.URISyntaxException;
+
+import io.socket.client.Ack;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     //We just want one instance of node running in the background.
     public static boolean _startedNodeAlready=false;
     WebView mWebView;
+    Socket socket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     BroadcastReceiver broadcastReceiver;
+    boolean broadcastRegistred = false;
     void createBroadcastReceiver(){
         broadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -74,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filterSend = new IntentFilter();
         filterSend.addAction("Check_Server_Status");
         registerReceiver(broadcastReceiver, filterSend);
+        broadcastRegistred = true;
     }
 
     void iniciaServidor(){
@@ -237,13 +249,46 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState)
     {
         super.onRestoreInstanceState(savedInstanceState);
-        Toast.makeText(this, "RestoreInstance", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "RestoreInstance", Toast.LENGTH_SHORT).show();
         mWebView.restoreState(savedInstanceState);
+        muestraPagina();
     }
 
+    Context context;
+    String fileOnDownload;
+    //Downloaded
+
     void muestraPagina(){
+        context = this;
+        try {
+            socket = IO.socket("http://localhost:1730");
+        }
+        catch (URISyntaxException e){}
+        socket.on("progressData", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                Integer obj = (Integer) args[0];
+                Log.d("asd", obj.toString());
+                if(obj==100){
+                    //tell system to scan in the song path to add it to the main library
+                    MediaScannerConnection.scanFile(context, new String[] { fileOnDownload }, null, new MediaScannerConnection.OnScanCompletedListener() {public void onScanCompleted(String path, Uri uri) { }});
+                }
+            }
+        });
+        socket.on("pathToDownload", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String obj = (String) args[0];
+                Log.d("asd", "path: " + obj);
+                fileOnDownload = obj;
+            }
+        });
+        socket.connect();
         mWebView.loadUrl("http://localhost:1730/");
-        unregisterReceiver(broadcastReceiver);
+        if(broadcastRegistred) {
+            unregisterReceiver(broadcastReceiver);
+            broadcastRegistred = false;
+        }
     }
 
     @Override
