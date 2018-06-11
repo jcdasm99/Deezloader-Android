@@ -1,14 +1,14 @@
 {
 	"serverPort": 1730,
 	"userDefined": {
-		"trackNameTemplate": "%artist% - %title%",
+		"trackNameTemplate": "%title%",
 		"playlistTrackNameTemplate": "%number%. %artist% - %title%",
-		"albumNameTemplate": "%artist% - %album%",
+		"albumNameTemplate": "%album%",
 		"createM3UFile": false,
 		"createArtistFolder": false,
 		"createAlbumFolder": false,
 		"downloadLocation": null,
-		"artworkSize": "/1400x1400.jpg",
+		"artworkSize": "/800x800.jpg",
 		"hifi": false,
 		"padtrck": false,
 		"syncedlyrics": false,
