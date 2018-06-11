@@ -4,13 +4,18 @@ import android.Manifest;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
+import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -59,13 +64,12 @@ public class MainActivity extends AppCompatActivity {
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
             } else {
+                mWebView.setWebViewClient(new HelloWebViewClient());
+                mWebView.setWebChromeClient(new WebChromeClient());
                 iniciaServidor();
             }
         }
-        mWebView.setWebViewClient(new HelloWebViewClient());
-        mWebView.setWebChromeClient(new WebChromeClient());
     }
-
     void iniciaServidor() {
         if (!_startedNodeAlready) {
             _startedNodeAlready = true;
@@ -101,36 +105,38 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 Integer progress = (Integer) args[0];
-                //Log.d("asd", progress.toString());
-                if (progress == 100) {
-                    //tell system to scan in the song path to add it to the main library
-                    File file = new File(fileOnDownload);
-                    Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                    intent.setData(Uri.fromFile(file));
-                    sendBroadcast(intent);
-                }
-                for (i = fileOnDownload.length() - 1; i >= 0; i--) {
-                    if (fileOnDownload.charAt(i) == '/') {
-                        index = i;
-                        break;
-                    }
-                }
-                actualDownload = fileOnDownload.substring(index + 1);
                 creaOActualizaNotification(progress);
+            }
+        });
+        socket.on("fetchingSongData", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                creaOActualizaNotification(0);
             }
         });
         socket.on("pathToDownload", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                String obj = (String) args[0];
-                fileOnDownload = obj;
+                fileOnDownload = (String) args[0];
+                songName = (String) args[1];
+            }
+        });
+        socket.on("downloadReady", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                //tell system to scan in the song path to add it to the main library
+                File file = new File(fileOnDownload);
+                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                intent.setData(Uri.fromFile(file));
+                sendBroadcast(intent);
+                fileOnDownload = null;
+                songName = null;
             }
         });
         socket.connect();
     }
     Context context;
-    String fileOnDownload;
-    //Downloaded
+    String fileOnDownload, songName;
 
     void muestraPagina() {
         context = this;
@@ -145,14 +151,13 @@ public class MainActivity extends AppCompatActivity {
 
     String CHANNEL_ID = "com.dt3264.Deezloader";
     int NOTIFICATION_ID=100;
-    String actualDownload;
     int i, index;
     void creaOActualizaNotification(int progress){
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_notification)
-                .setContentTitle("Downloading " + actualDownload)
-                .setContentText(progress + "%")
-                .setProgress(100, progress, false)
+                .setContentTitle(songName!=null ? ("Downloading: " + songName) : "Getting track info")
+                .setSubText(progress + "%")
+                .setProgress(100, progress, (progress==0))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         mBuilder.setOnlyAlertOnce(true);
@@ -177,6 +182,25 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    boolean doubleBackToExitPressedOnce = false;
+
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+        this.doubleBackToExitPressedOnce = true;
+        String message = "Click BACK again to exit the app (all remaining downloads will be removed) or Home to exit without close";
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce=false;
+            }
+        }, 2000);
     }
 
     @Override
@@ -223,9 +247,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        //Toast.makeText(this, "RestoreInstance", Toast.LENGTH_SHORT).show();
         mWebView.restoreState(savedInstanceState);
-        muestraPagina();
+        //muestraPagina();
     }
 
     /**
