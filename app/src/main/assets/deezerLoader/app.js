@@ -134,13 +134,14 @@ function aldecrypt(encoded) {
 // START sockets clusterfuck
 io.sockets.on('connection', function (socket) {
 	//socket.emit('version', packagejson.version)
+	socket.emit("siteReady", "ready uwu");
 	socket.downloadQueue = [];
 	socket.currentItem = null;
 	socket.lastQueueId = null;
 	request.get("https://pastebin.com/raw/fTEXMKQH", function (error, response, body) {
 		body = body.replace("\r","");
 		if(!error && response.statusCode == 200){
-			console.log(packagejson);
+			//console.log(packagejson);
 			if(body.split("\n")[0] != packagejson.version){
 				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
 				Deezer.logs('Info',"Outdated version, the latest is "+body.split("\n")[0]);
