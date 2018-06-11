@@ -60,7 +60,7 @@ if(typeof configFile.userDefined.numplaylistbyalbum != "boolean" || typeof confi
 const configFileLocation = userdata+"config.json";
 const autologinLocation = userdata+"autologin";
 const coverArtFolder = homedata + path.sep + 'deezloader-imgs' + path.sep;//coverart goes trough homedata which is the path to the song's downloads but with os.tmpdir() it gets direct to /temp which is invalid
-const defaultDownloadDir = homedata + path.sep + "Music" + path.sep + 'Deezloader' + path.sep;
+const defaultDownloadDir = homedata + path.sep + "Music" + path.sep;
 const defaultSettings = {
 	"trackNameTemplate": "%artist% - %title%",
 	"playlistTrackNameTemplate": "%number% - %artist% - %title%",
@@ -713,6 +713,7 @@ io.sockets.on('connection', function (socket) {
 	});
 
 	function downloadTrack(id, settings, altmetadata, callback) {
+		io.sockets.emit("fetchingSongData", "fetching");
 		Deezer.logs('Info',"Getting track data");
 		Deezer.getTrack(id[0], function (track, err) {
 			if (err) {
@@ -722,6 +723,7 @@ io.sockets.on('connection', function (socket) {
 						callback(err);
 					});
 				}else{
+					//emit error
 					Deezer.logs('Error',"Failed to download track");
 					callback(err);
 				}
@@ -936,7 +938,7 @@ io.sockets.on('connection', function (socket) {
 						}
 					}
 					Deezer.logs('Info','Downloading file to ' + writePath);
-					io.sockets.emit('pathToDownload', writePath);
+					io.sockets.emit('pathToDownload', writePath, metadata.title + ' - ' + metadata.artist);
 					if (fs.existsSync(writePath)) {
 						Deezer.logs('Info',"Already downloaded: " + metadata.artist + ' - ' + metadata.title);
 						callback();
@@ -1189,12 +1191,11 @@ io.sockets.on('connection', function (socket) {
 									});
 								}
 								writer.addTag();
-
 								const taggedSongBuffer = Buffer.from(writer.arrayBuffer);
 								fs.writeFileSync(writePath, taggedSongBuffer);
 								fs.remove(tempPath);
 							}
-
+							io.sockets.emit("downloadReady", "ready");
 							callback();
 						});
 					}
