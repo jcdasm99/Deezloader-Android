@@ -10,11 +10,7 @@ Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoa
 - But adapted for the small screens
 
 # Downloads
-- Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/app/release)
-
-# Things coming in the future
-- Notification when a song is being downloaded
-- Propelly adding the songs to the device media database (to see the downloaded media instalty [instead after restarting the device] reflected on the music apps)
+- Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release)
 
 # Credits
 ## Original Developer
