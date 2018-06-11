@@ -104,12 +104,10 @@ public class MainActivity extends AppCompatActivity {
                 //Log.d("asd", progress.toString());
                 if (progress == 100) {
                     //tell system to scan in the song path to add it to the main library
-                    sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + fileOnDownload)));
-                    //this other method used to work...used
-                    /*MediaScannerConnection.scanFile(context, new String[]{fileOnDownload}, null, new MediaScannerConnection.OnScanCompletedListener() {
-                        public void onScanCompleted(String path, Uri uri) {
-                        }
-                    });*/
+                    File file = new File(fileOnDownload);
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    intent.setData(Uri.fromFile(file));
+                    sendBroadcast(intent);
                 }
                 for (i = fileOnDownload.length() - 1; i >= 0; i--) {
                     if (fileOnDownload.charAt(i) == '/') {
@@ -125,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 String obj = (String) args[0];
-                Log.d("asd", "path: " + obj);
                 fileOnDownload = obj;
             }
         });
@@ -137,7 +134,6 @@ public class MainActivity extends AppCompatActivity {
 
     void muestraPagina() {
         context = this;
-        //mWebView.loadUrl("http://localhost:1730/");
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -153,9 +149,9 @@ public class MainActivity extends AppCompatActivity {
     int i, index;
     void creaOActualizaNotification(int progress){
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher  )
-                .setContentTitle("Descargando " + actualDownload)
-                .setSubText(progress + "%")
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setContentTitle("Downloading " + actualDownload)
+                .setContentText(progress + "%")
                 .setProgress(100, progress, false)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
