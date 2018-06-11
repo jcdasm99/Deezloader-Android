@@ -1,6 +1,6 @@
 # DeezLoader For Android 
 
-# 1.1
+# Version 1.1 (Lastest version)
 
 [DeezLoader_1.1.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader_debug_1.1.apk)
 
