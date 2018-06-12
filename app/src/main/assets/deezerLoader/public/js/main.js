@@ -361,8 +361,8 @@ function showResults_table_artist(artists) {
 
 		$(tableBody).append(
 				'<tr class="animated fadeInUp">' +
-				'<td><p class="imgArtista"><img src="' + currentResultArtist['picture_small'] + '" class="circle" /></p>' +
-				'<section class="centrado detallesArtist">' +
+				'<td><p class="imgArtista"><img src="' + currentResultArtist['picture_small'] + '" class="circle" /></p></td>' +
+				'<td><section class="centrado detallesArtist">' +
                 '' + currentResultArtist['name'] + '</br>' +
 				'' + currentResultArtist['nb_album'] + " album" + (currentResultArtist['nb_album']!==1? 's':'')+
                 '</section>' +
@@ -390,8 +390,8 @@ function showResults_table_playlist(playlists) {
 
 		$(tableBody).append(
 				'<tr class="animated fadeInUp">' +
-				'<td><p class="imgPlay"><img src="' + currentResultPlaylist['picture_small'] + '" class="circle" /></p>' +
-                '<section class="centrado detallesPlay">' +
+				'<td><p class="imgPlay"><img src="' + currentResultPlaylist['picture_small'] + '" class="circle" /></p></td>' +
+                '<td><section class="centrado detallesPlay">' +
 				'' + currentResultPlaylist['title'] + '</br>' +
 				'' + currentResultPlaylist['nb_tracks'] + ' song' + (currentResultPlaylist['nb_tracks']>1?"s":"") + '</br>' +
                 '</section>' +
@@ -666,15 +666,13 @@ socket.on("getChartsTrackListByCountry", function (data) {
 
 		$(chartsTableBody).append(
 				'<tr>' +
-				'<td>' +
-				'<p><img src="' + currentChartTrack['album']['cover_small'] + '" class="circle" /></p>' +
-                "No." + (i + 1) + '</br>' +
+				'<td><p><img src="' + currentChartTrack['album']['cover_small'] + '" class="circle" /></p></td>' +
+                "<td class='centrado'>No." + (i + 1) + '</br>' +
                 currentChartTrack['title'] + '</br>' +
 				'' + currentChartTrack['artist']['name'] + '</br>' +
 				'' + currentChartTrack['album']['title'] + '</br>' +
 				'' + convertDuration(currentChartTrack['duration']) + '</bt>' +
-                '</section>' +
-                '</td>'+
+                '</section></td>' +
 				'</tr>');
 		generateDownloadLink(currentChartTrack['link']).appendTo(chartsTableBody.children('tr:last')).wrap('<td>');
 
