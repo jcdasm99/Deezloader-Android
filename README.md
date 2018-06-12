@@ -1,7 +1,7 @@
-# DeezLoader Reborn V3.1.2 Unofficial For Android
+# DeezLoader For Android
 
 Thanks to the power of the recent [Node.js for Mobile Apps](https://github.com/janeasystems/nodejs-mobile). I'm glad to present to you the adapted version of [DeezLoader Reborn](https://gitlab.com/Monsterwolf/DeezLoader-Reborn) for Android!
-Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoader-Reborn#how-to-run-on-android) to run this tool, just download the [release apk](https://gitlab.com/DT3264/DeezLoader-Android/release) for your specific architecture and start to enjoying of this app natively in your device.
+Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoader-Reborn#how-to-run-on-android) to run this tool, just download the [apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader_debug_1.1.apk) and you're ready to go.
 
 **Telegram News Channel** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
 
@@ -10,11 +10,11 @@ Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoa
 - But adapted for the small screens
 
 # Downloads
-- Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/app/release)
+- Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release)
 
-# Things coming in the future
-- Notification when a song is being downloaded
-- Propelly adding the songs to the device media database (to see the downloaded media instalty [instead after restarting the device] reflected on the music apps)
+# Crashes
+
+In case there's a crash in the app, a notification will be displayed, open it and send it to the following mail "cernadaniel32@gmail.com" to keep improving the app.
 
 # Credits
 ## Original Developer
