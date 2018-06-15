@@ -15,12 +15,12 @@ socket.on("newupdate", function(ver, dllink){
 	if(typeof shell != 'undefined'){
 		if (window.confirm("You are using an outdated version, the newest is "+ver+".\nClick OK to redirect to the download page or Cancel to close.")) 
 		{
-			shell.openExternal(dllink);
+			socket.emit("openLinkNewVersion", dllink);
 		};
 	}else{
 		if (window.confirm("You are using an outdated version, the newest is "+ver+".\nClick OK to redirect to the download page or Cancel to close.")) 
 		{
-			window.open(dllink);
+			socket.emit("openLinkNewVersion", dllink);
 		};
 	}
 });
