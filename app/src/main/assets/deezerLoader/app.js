@@ -161,6 +161,9 @@ io.sockets.on('connection', function (socket) {
 	socket.on('sendProgress', function(progress){
 		io.sockets.emit('progressData', progress);
 	});
+	socket.on('openLinkNewVersion', function(url){
+		io.sockets.emit('newVersion', url);
+	});
 	socket.on("login", function (username, password, autologin) {
 		Deezer.init(username, password, function (err) {
 			if(err){
