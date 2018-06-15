@@ -9,7 +9,7 @@ Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoa
 - Same as the desktop version
 - But adapted for the small screens
 
-# Downloads
+# Download (Lastest: 1.1.3)
 - Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release)
 
 # Crashes
