@@ -44,6 +44,7 @@ socket.on("autologin",function(username,password){
 	$('#modal_login_btn_login').attr("disabled", true);
 	$('#modal_login_btn_login').html("Logging in...");
 	$('#modal_login_input_username').val(username);
+	$('#modal_login_input_autologin').prop("checked", true);
 	Username = username;
 	$('#modal_login_input_password').val(password);
 	socket.emit('login', username, password,false);
@@ -303,7 +304,9 @@ function showResults_table_track(tracks) {
 		$(tableBody).append(
 				'<tr class="animated fadeInUp">' +
 				'<td><p><img src="' + currentResultTrack['album']['cover_small'] + '" class="circle"/></p>' +
-                '<section class="centrado">'+(currentResultTrack.explicit_lyrics ? '<td><i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '<td> ')+
+                '<td class="centrado">'+
+				(currentResultTrack.explicit_lyrics ? 
+				'<i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '')+
                 '' + currentResultTrack['title'] + '</br>' +
 				'' + currentResultTrack['artist']['name'] + '</br>' +
 				'' + currentResultTrack['album']['title'] + '</br>' +
@@ -312,7 +315,7 @@ function showResults_table_track(tracks) {
                 '</td>' +
 				'</tr>');
 
-		generateDownloadLink(currentResultTrack['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
+		generateDownloadLink(currentResultTrack['link']).appendTo(tableBody.children('tr:last')).wrap('<td class="toRight">');
 
 	}
 	$('.tooltipped').tooltip({delay: 100});
@@ -324,7 +327,7 @@ function showResults_table_album(albums) {
 
 	$(tableBody).html('');
 	$('#tab_search_table_results_thead_album').removeClass('hide');
-
+	
 	for (var i = 0; i < albums.length; i++) {
 
 		var currentResultAlbum = albums[i];
@@ -332,16 +335,17 @@ function showResults_table_album(albums) {
 		$(tableBody).append(
 				'<tr class="animated fadeInUp">' +
 				'<td><p class=""><img src="' + currentResultAlbum['cover_small'] + '" class="circle" /></p>' +
-                '<section class="centrado">' +
-				(currentResultAlbum.explicit_lyrics ? '<td><i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '<td> ') + currentResultAlbum['title'] + '</td>' +
+                '<td class="centrado">' +
+				(currentResultAlbum.explicit_lyrics ? '<i class="material-icons valignicon tiny materialize-red-text tooltipped" data-tooltip="Explicit">error_outline</i> ' : '') + 
+				currentResultAlbum['title'] + '</br>' +
 				'' + currentResultAlbum['artist']['name'] + '</br>' +
-				'' + currentResultAlbum['nb_tracks'] + 'song' + (currentResultAlbum['nb_tracks']>1? 's':'') + '</br>' +
-				'' + currentResultAlbum['record_type'] + '</br>' +
-                '</section>'+
+				'' + currentResultAlbum['nb_tracks'] + ' song' + (currentResultAlbum['nb_tracks']>1? 's':'') + '</br>' +
+				'type: ' + currentResultAlbum['record_type'] + '</br>' +
+                '</td>'+
+				'<td class="toRight"></td>' +
 				'</tr>');
-
-		generateShowTracklistSelectiveButton(currentResultAlbum['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
-		generateDownloadLink(currentResultAlbum['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
+		tableBody.children().children('td:last').append(generateShowTracklistSelectiveButton(currentResultAlbum['link']));
+		tableBody.children().children('td:last').append(generateDownloadLink(currentResultAlbum['link']));
 
 	}
 	$('.tooltipped').tooltip({delay: 100});
@@ -369,7 +373,7 @@ function showResults_table_artist(artists) {
                 '</td>' +
 				'</tr>');
 
-		generateShowTracklistButton(currentResultArtist['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
+		generateShowTracklistButton(currentResultArtist['link']).appendTo(tableBody.children('tr:last')).wrap('<td class="toRight">');
 		//generateDownloadLink(currentResultArtist['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
 
 	}
@@ -396,10 +400,10 @@ function showResults_table_playlist(playlists) {
 				'' + currentResultPlaylist['nb_tracks'] + ' song' + (currentResultPlaylist['nb_tracks']>1?"s":"") + '</br>' +
                 '</section>' +
                 '</td>'+
+				'<td class="toRight"></td>' +
 				'</tr>');
-
-		generateShowTracklistSelectiveButton(currentResultPlaylist['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
-		generateDownloadLink(currentResultPlaylist['link']).appendTo(tableBody.children('tr:last')).wrap('<td>');
+		tableBody.children().children('td:last').append(generateShowTracklistSelectiveButton(currentResultPlaylist['link']));
+		tableBody.children().children('td:last').append(generateDownloadLink(currentResultPlaylist['link']));
 
 	}
 	$('.tooltipped').tooltip({delay: 100});
@@ -672,9 +676,9 @@ socket.on("getChartsTrackListByCountry", function (data) {
 				'' + currentChartTrack['artist']['name'] + '</br>' +
 				'' + currentChartTrack['album']['title'] + '</br>' +
 				'' + convertDuration(currentChartTrack['duration']) + '</bt>' +
-                '</section></td>' +
+                '</td>' +
 				'</tr>');
-		generateDownloadLink(currentChartTrack['link']).appendTo(chartsTableBody.children('tr:last')).wrap('<td>');
+		generateDownloadLink(currentChartTrack['link']).appendTo(chartsTableBody.children('tr:last')).wrap('<td class="centrado">');
 
 	}
 
@@ -792,7 +796,6 @@ socket.on('updateQueue', function (data) {
 
 });
 
-//toLog
 var lastPercentage = 100;
 socket.on("downloadProgress", function (data) {
 	//data.queueId -> id (string)
