@@ -1,6 +1,7 @@
 package com.dt3264.deezloader;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -93,12 +94,20 @@ public class MainActivity extends AppCompatActivity {
     void preparaNodeServerListeners() {
         try {
             socket = IO.socket("http://localhost:1730");
-        } catch (URISyntaxException e) {
-        }
+        } catch (URISyntaxException e) { }
         socket.on("siteReady", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 muestraPagina();
+            }
+        });
+        socket.on("newVersion", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String url = (String)args[0];
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
             }
         });
         socket.on("progressData", new Emitter.Listener() {
@@ -165,7 +174,18 @@ public class MainActivity extends AppCompatActivity {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         // notificationId is a unique int for each notification that you must define
         if(progress<100) notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-        else notificationManager.cancel(NOTIFICATION_ID);
+        else {
+            acabaNotificacion();
+            NOTIFICATION_ID++;
+        }
+    }
+    void acabaNotificacion(){
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setContentTitle("Downloaded: " + songName)
+                .setPriority(NotificationCompat.PRIORITY_LOW);
+        mBuilder.setOnlyAlertOnce(true);
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, mBuilder.build());
     }
 
     private void createNotificationChannel() {
