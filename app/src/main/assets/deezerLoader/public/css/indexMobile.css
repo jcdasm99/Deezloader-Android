@@ -94,3 +94,7 @@ td>.floatRight{
 	table-layout: fixed;
 }
 
+.toRight{
+	text-align: right;
+}
+
