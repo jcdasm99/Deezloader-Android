@@ -144,7 +144,17 @@ io.sockets.on('connection', function (socket) {
 			//console.log(packagejson);
 			if(body.split("\n")[0] != packagejson.version){
 				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
-				Deezer.logs('Info',"Outdated version, the latest is "+body.split("\n")[0]);
+				Deezer.logs('Info',"Outdated Deezloader, the latest is "+body.split("\n")[0]);
+			}
+		}
+	});
+	request.get("https://pastebin.com/raw/Njv61TMS", function (error, response, body) {
+		body = body.replace("\r","");
+		if(!error && response.statusCode == 200){
+			//console.log(packagejson);
+			if(body.split("\n")[0] != '1.1.3'){
+				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
+				Deezer.logs('Info',"The latest apk is "+body.split("\n")[0]);
 			}
 		}
 	});
@@ -1194,6 +1204,9 @@ io.sockets.on('connection', function (socket) {
 								const taggedSongBuffer = Buffer.from(writer.arrayBuffer);
 								fs.writeFileSync(writePath, taggedSongBuffer);
 								fs.remove(tempPath);
+							}
+							if(metadata.imagePath){
+								fs.remove(metadata.imagePath);
 							}
 							io.sockets.emit("downloadReady", "ready");
 							callback();
