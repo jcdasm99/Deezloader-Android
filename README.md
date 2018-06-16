@@ -1,15 +1,15 @@
 # DeezLoader For Android
 
-Thanks to the power of the recent [Node.js for Mobile Apps](https://github.com/janeasystems/nodejs-mobile). I'm glad to present to you the adapted version of [DeezLoader Reborn](https://gitlab.com/Monsterwolf/DeezLoader-Reborn) for Android!
-Now you can forget of the [termux method](https://gitlab.com/Monsterwolf/DeezLoader-Reborn#how-to-run-on-android) to run this tool, just download the [apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader_debug_1.1.apk) and you're ready to go.
+Thanks to the power of the recent [Node.js for Mobile Apps](https://github.com/janeasystems/nodejs-mobile). I'm glad to present to you the adapted version of DeezLoader for Android!
+Now you can forget of the termux methodto run this tool, just download the [apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader_debug_1.1.apk)and you're ready to go.
 
-**Telegram News Channel** - https://t.me/joinchat/AAAAAFCRjRpUr-IF96RV3g
+**Telegram chanel** - https://t.me/DeezLoaderAndroid
 
 # Features
 - Same as the desktop version
 - But adapted for the small screens
 
-# Download (Lastest: 1.1.3)
+# Download  (Lastest: 1.1.4)
 - Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release)
 
 # Crashes
