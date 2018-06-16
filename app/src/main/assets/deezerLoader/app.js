@@ -95,6 +95,8 @@ Deezer.logs('Info', 'Server is running @ localhost:' + configFile.serverPort);
 
 var ekey = "DeezLadRebExtLrdDeezLadRebExtLrd";
 
+let tempImg = null;
+
 function alencrypt(input) {
 	var iv = crypto.randomBytes(16);
 
@@ -409,7 +411,7 @@ io.sockets.on('connection', function (socket) {
 			if (err) {
 				return;
 			}
-			let queueId = "id" + Math.random().toString(36).substring(2);
+			let queueId = "id" + Math.random().toString(36).substring(4);
 			let _track = {
 				name: track["SNG_TITLE"],
 				size: 1,
@@ -434,7 +436,7 @@ io.sockets.on('connection', function (socket) {
 				if (err) {
 					return;
 				}
-				let queueId = "id" + Math.random().toString(36).substring(2);
+				let queueId = "id" + Math.random().toString(36).substring(4);
 				let _playlist = {
 					name: playlist["title"],
 					size: size,
@@ -459,7 +461,7 @@ io.sockets.on('connection', function (socket) {
 				if (err) {
 					return;
 				}
-				let queueId = "id" + Math.random().toString(36).substring(2);
+				let queueId = "id" + Math.random().toString(36).substring(4);
 				let _album = {
 					name: album["title"],
 					label: album["label"],
@@ -491,7 +493,7 @@ io.sockets.on('connection', function (socket) {
 						if(err) {
 						  return;
 						}
-						let queueId = "id" + Math.random().toString(36).substring(2);
+						let queueId = "id" + Math.random().toString(36).substring(4);
 						let album = albums.data[i];
 						let _album = {
 							name: album["title"],
@@ -684,7 +686,10 @@ io.sockets.on('connection', function (socket) {
 			socket.currentItem.cancelFlag = true;
 		}
 		if (cancel) {
-			socket.emit("cancelDownload", {queueId: data.queueId});
+			if(tempImg!==null){
+				fs.remove(tempImg);
+			}
+			io.sockets.emit("cancelDownload", {queueId: data.queueId});
 		}
 	});
 
@@ -954,6 +959,7 @@ io.sockets.on('connection', function (socket) {
 					io.sockets.emit('pathToDownload', writePath, metadata.title + ' - ' + metadata.artist);
 					if (fs.existsSync(writePath)) {
 						Deezer.logs('Info',"Already downloaded: " + metadata.artist + ' - ' + metadata.title);
+						io.sockets.emit('alreadyDownloaded', metadata.title + ' - ' + metadata.artist);
 						callback();
 						return;
 					}
@@ -992,6 +998,7 @@ io.sockets.on('connection', function (socket) {
 								})
 							});
 						}
+						tempImg = imgPath;
 					}else{
 						metadata.image = undefined;
 						Deezer.logs('Info',"Starting the download process CODE:3");
