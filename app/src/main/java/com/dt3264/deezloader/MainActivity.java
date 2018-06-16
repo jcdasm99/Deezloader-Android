@@ -9,9 +9,11 @@ import android.content.ContentProvider;
 import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.CalendarContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -114,13 +116,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 Integer progress = (Integer) args[0];
-                creaOActualizaNotification(progress);
+                notificaDescarga(progress);
             }
         });
         socket.on("fetchingSongData", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                creaOActualizaNotification(0);
+                notificaDescarga(0);
             }
         });
         socket.on("pathToDownload", new Emitter.Listener() {
@@ -128,6 +130,23 @@ public class MainActivity extends AppCompatActivity {
             public void call(Object... args) {
                 fileOnDownload = (String) args[0];
                 songName = (String) args[1];
+            }
+        });
+        socket.on("cancelDownload", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                notificaDescargaCancelada();
+                fileOnDownload = null;
+                songName = null;
+            }
+        });
+        socket.on("alreadyDownloaded", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String song = (String) args[0];
+                notificaYaDescargado(song);
+                fileOnDownload = null;
+                songName = null;
             }
         });
         socket.on("downloadReady", new Emitter.Listener() {
@@ -160,8 +179,8 @@ public class MainActivity extends AppCompatActivity {
 
     String CHANNEL_ID = "com.dt3264.Deezloader";
     int NOTIFICATION_ID=100;
-    int i, index;
-    void creaOActualizaNotification(int progress){
+    int i;
+    void notificaDescarga(int progress){
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_notification)
                 .setContentTitle(songName!=null ? ("Downloading: " + songName) : "Getting track info")
@@ -179,6 +198,35 @@ public class MainActivity extends AppCompatActivity {
             NOTIFICATION_ID++;
         }
     }
+
+    void notificaYaDescargado(String song){
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setContentTitle("Already downloaded: " + song)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        mBuilder.setOnlyAlertOnce(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        NOTIFICATION_ID++;
+    }
+
+    void notificaDescargaCancelada(){
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_notification)
+                .setContentTitle("Download canceled: " + songName)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        mBuilder.setOnlyAlertOnce(true);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        // notificationId is a unique int for each notification that you must define
+        notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        NOTIFICATION_ID++;
+    }
+
     void acabaNotificacion(){
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_notification)
