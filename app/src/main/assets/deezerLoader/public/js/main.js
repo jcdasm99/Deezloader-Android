@@ -121,6 +121,20 @@ $('#nav_btn_openSettingsModal').click(function () {
 	fillSettingsModal(userSettings);
 });
 
+//Sólo un botón "Seleccione su ruta" y abre el intent que pide la carpeta y la regresa y la guarda
+$('#modal_settings_btn_selectPathDownload').on('click', function () {
+	socket.emit("requestNewPath");
+});
+var actualPathToShow = null;
+socket.on('newPath', function(newPath){
+	actualPathToShow = newPath
+});
+
+$('#modal_settings_btn_defaultPathDownload').click(function(){
+	socket.emit("useDefaultPath");
+	actualPathToShow = null;
+});
+
 // Save settings button
 $('#modal_settings_btn_saveSettings').click(function () {
 	let settings = {};
@@ -186,7 +200,7 @@ function fillSettingsModal(settings) {
 	$('#modal_settings_cbox_padtrck').prop('checked', settings.padtrck);
 	$('#modal_settings_cbox_syncedlyrics').prop('checked', settings.syncedlyrics);
 	$('#modal_settings_cbox_numplaylistbyalbum').prop('checked', settings.numplaylistbyalbum);
-	$('#modal_settings_input_downloadTracksLocation').val(settings.downloadLocation);
+	$('#modal_settings_input_downloadTracksLocation').val( actualPathToShow===null? settings.downloadLocation: actualPathToShow);
 	$('#modal_settings_select_artworkSize').val(settings.artworkSize).material_select();
 
 	Materialize.updateTextFields()

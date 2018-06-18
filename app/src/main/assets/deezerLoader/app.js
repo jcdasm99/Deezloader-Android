@@ -69,7 +69,7 @@ const defaultSettings = {
 	"createArtistFolder": false,
 	"createAlbumFolder": false,
 	"downloadLocation": null,
-	"artworkSize": "/1400x1400.jpg",
+	"artworkSize": "/800x800.jpg",
 	"hifi": false,
 	"padtrck": false,
 	"syncedlyrics": false,
@@ -136,7 +136,7 @@ function aldecrypt(encoded) {
 // START sockets clusterfuck
 io.sockets.on('connection', function (socket) {
 	//socket.emit('version', packagejson.version)
-	socket.emit("siteReady", "ready uwu");
+	socket.emit("siteReady");
 	socket.downloadQueue = [];
 	socket.currentItem = null;
 	socket.lastQueueId = null;
@@ -155,16 +155,28 @@ io.sockets.on('connection', function (socket) {
 		if(!error && response.statusCode == 200){
 			//console.log(packagejson);
 			if(body.split("\n")[0] != '1.1.3'){
-				socket.emit("newupdate",body.split("\n")[0], body.split("\n")[1]);
+				socket.emit("newupdate", body.split("\n")[0], body.split("\n")[1]);
 				Deezer.logs('Info',"The latest apk is "+body.split("\n")[0]);
 			}
 		}
+	});
+	socket.on("requestNewPath", function(){
+		io.sockets.emit("requestNewPath");
+	});
+	socket.on('newPath', function(path){
+		io.sockets.emit('newPath', path)
 	});
 	socket.on('sendProgress', function(progress){
 		io.sockets.emit('progressData', progress);
 	});
 	socket.on('openLinkNewVersion', function(url){
 		io.sockets.emit('newVersion', url);
+	});
+	socket.on("useDefaultPath", function(){
+		io.sockets.emit("useDefaultPath");
+	});
+	socket.on("newPath", function(newPath){
+		io.sockets.emit("newPath", newPath);
 	});
 	socket.on("login", function (username, password, autologin) {
 		Deezer.init(username, password, function (err) {
@@ -183,6 +195,7 @@ io.sockets.on('connection', function (socket) {
 					});
 				}
 				socket.emit("login", "none");
+				io.sockets.emit("checkIfHasNewPath");
 				Deezer.logs('Info',"Logged in successfully");
 			}
 		});

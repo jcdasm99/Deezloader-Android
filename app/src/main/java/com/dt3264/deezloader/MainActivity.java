@@ -10,14 +10,19 @@ import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.CalendarContract;
+import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.os.EnvironmentCompat;
 import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -32,8 +37,16 @@ import android.content.pm.PackageManager;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.widget.Toast;
+
+import com.obsez.android.lib.filechooser.ChooserDialog;
+import com.obsez.android.lib.filechooser.internals.FileUtil;
+import com.snatik.storage.Storage;
+
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
@@ -52,28 +65,37 @@ public class MainActivity extends AppCompatActivity {
     WebView mWebView;
     Socket socket;
     String nodeDir;
+    SharedPreferences sharedPreferences;
+    Storage storage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-        createNotificationChannel();
         mWebView = findViewById(R.id.webView);
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        createNotificationChannel();
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+        storage = new Storage(getApplicationContext());
         if (savedInstanceState == null) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
-            } else {
-                mWebView.setWebViewClient(new HelloWebViewClient());
-                mWebView.setWebChromeClient(new WebChromeClient());
-                iniciaServidor();
-            }
+            compruebaPermisos();
         }
     }
+
+    void compruebaPermisos(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            // No explanation needed, we can request the permission.
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 100);
+        } else {
+            iniciaServidor();
+        }
+    }
+
     void iniciaServidor() {
+        mWebView.setWebViewClient(new HelloWebViewClient());
+        mWebView.setWebChromeClient(new WebChromeClient());
         if (!_startedNodeAlready) {
             _startedNodeAlready = true;
             new Thread(new Runnable() {
@@ -103,6 +125,19 @@ public class MainActivity extends AppCompatActivity {
                 muestraPagina();
             }
         });
+        socket.on("checkIfHasNewPath", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                String magicUri = sharedPreferences.getString(SHARED_PREFS_NEW_PATH, "");
+                if (!magicUri.equals("")) {
+                    //Get uri and send it to the app to show it instead the internal path
+                    Uri treeUri = Uri.parse(magicUri);
+                    String realPath = treeUri.getPath().replace("tree", "storage").replace(":", "/");
+                    if(!realPath.endsWith("/")) realPath+="/";
+                    socket.emit("newPath", realPath);
+                }
+            }
+        });
         socket.on("newVersion", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
@@ -110,6 +145,18 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
+            }
+        });
+        socket.on("requestNewPath", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 1234);
+            }
+        });
+        socket.on("useDefaultPath", new Emitter.Listener() {
+            @Override
+            public void call(Object... args) {
+                sharedPreferences.edit().putString(SHARED_PREFS_NEW_PATH, "").apply();
             }
         });
         socket.on("progressData", new Emitter.Listener() {
@@ -128,15 +175,16 @@ public class MainActivity extends AppCompatActivity {
         socket.on("pathToDownload", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                fileOnDownload = (String) args[0];
+                internalPath = (String) args[0];
                 songName = (String) args[1];
+                fileName = internalPath.substring(internalPath.lastIndexOf("/")+1);
             }
         });
         socket.on("cancelDownload", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
                 notificaDescargaCancelada();
-                fileOnDownload = null;
+                internalPath = null;
                 songName = null;
             }
         });
@@ -145,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
             public void call(Object... args) {
                 String song = (String) args[0];
                 notificaYaDescargado(song);
-                fileOnDownload = null;
+                internalPath = null;
                 songName = null;
             }
         });
@@ -153,18 +201,53 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 //tell system to scan in the song path to add it to the main library
-                File file = new File(fileOnDownload);
-                Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                intent.setData(Uri.fromFile(file));
-                sendBroadcast(intent);
-                fileOnDownload = null;
+                File internalFile;
+                String magicUri = sharedPreferences.getString(SHARED_PREFS_NEW_PATH, "");
+                if(!magicUri.equals("")) {
+                    //Get uri and get permissions for the external dir
+                    Uri treeUri = Uri.parse(magicUri);
+                    DocumentFile pickedDir = DocumentFile.fromTreeUri(getBaseContext(), treeUri);
+                    grantUriPermission(getPackageName(), treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    //Copy file with dir with permissions given
+                    copyFile("/storage/emulated/0/Music/", fileName, fileName, pickedDir);
+                    //delete source file after the copy was completed
+                    internalFile = new File(internalPath);
+                    internalFile.delete();
+                    //and scan the output file
+                    File externalFile = new File("/storage/" + pickedDir.getName() + "/" + fileName);
+                    scanNewSongExternal(externalFile);
+                }
+                else {
+                    internalFile = new File(internalPath);
+                    scanNewSongInternal(Uri.fromFile(internalFile));
+                }
+                internalPath = null;
                 songName = null;
             }
         });
         socket.connect();
     }
+
+    void scanNewSongInternal(Uri fileUri){
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        intent.setData(fileUri);
+        sendBroadcast(intent);
+    }
+
+    void scanNewSongExternal(File externalFile){
+        MediaScannerConnection.scanFile(getBaseContext(), new String[] { externalFile.toString() }, null, new MediaScannerConnection.OnScanCompletedListener() {
+            public void onScanCompleted(String path, Uri uri) {
+                Log.i("ExternalStorage", "Scanned " + path + ":");
+                Log.i("ExternalStorage", "-> uri=" + uri);
+            }
+        });
+    }
+
+    String SHARED_PREFS_NEW_PATH = "newPath";
+
     Context context;
-    String fileOnDownload, songName;
+    String internalPath, songName, fileName;
 
     void muestraPagina() {
         context = this;
@@ -252,6 +335,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
     boolean doubleBackToExitPressedOnce = false;
 
     @Override
@@ -286,6 +370,54 @@ public class MainActivity extends AppCompatActivity {
                     this.finish();
                 }
             }
+        }
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        if (resultCode == RESULT_OK && requestCode == 1234){
+            Uri treeUri = resultData.getData();
+            sharedPreferences.edit().putString(SHARED_PREFS_NEW_PATH, treeUri.toString()).apply();
+            String realPath = treeUri.getPath().replace("tree", "storage").replace(":", "/");
+            if(!realPath.endsWith("/")) realPath+="/";
+            socket.emit("newPath", realPath);
+        }
+    }
+
+    public void copyFile(String inputPath, String inputFile, String outputPath, DocumentFile pickedDir) {
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            //create output directory if it doesn't exist
+            File dir = new File(outputPath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            in = new FileInputStream(inputPath + inputFile);
+            //out = new FileOutputStream(outputPath + inputFile);
+
+            DocumentFile file = null;
+            if(outputPath.endsWith("mp3")) file = pickedDir.createFile("audio/mpeg3", outputPath);
+            else file = pickedDir.createFile("audio/flac", outputPath);
+            out = getContentResolver().openOutputStream(file.getUri());
+
+            copyFile(in, out);
+            in.close();
+
+
+            // write the output file (You have now copied the file)
+            out.flush();
+            out.close();
+
+            //scanNewSong(file.getUri());
+        }
+        catch (FileNotFoundException fnfe1) {
+            /* I get the error here */
+            Log.e("tag", fnfe1.getMessage());
+        }
+        catch (Exception e) {
+            Log.e("tag", e.getMessage());
         }
     }
 

@@ -7,8 +7,8 @@ android {
         applicationId "com.dt3264.deezloader"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 6
-        versionName "1.1.4"
+        versionCode 7
+        versionName "1.1.5"
         archivesBaseName = "DeezLoader-$versionName"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -78,6 +78,10 @@ dependencies {
         transitive = true
     }
     releaseImplementation('com.github.ajitsing:sherlock-no-op:1.0.4@aar')
+
+    implementation 'com.github.hedzr:android-file-chooser:master-SNAPSHOT'
+
+    implementation 'com.snatik:storage:2.1.0'
 
     testImplementation 'junit:junit:4.12'
 }

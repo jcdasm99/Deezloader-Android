@@ -98,3 +98,20 @@ td>.floatRight{
 	text-align: right;
 }
 
+.btnStorage{
+	margin-top: 0;
+	padding-bottom: 1rem;
+}
+
+.btnStorageContainer{
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin-bottom: 10px;
+}
+#storageButtonsContainer{
+	padding-bottom: 1rem;
+}
+
+#modal_settings_btn_defaultPathDownload, #modal_settings_btn_selectPathDownload{
+	height: auto!important;
+}
