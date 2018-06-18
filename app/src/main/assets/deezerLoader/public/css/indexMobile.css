@@ -115,3 +115,6 @@ td>.floatRight{
 #modal_settings_btn_defaultPathDownload, #modal_settings_btn_selectPathDownload{
 	height: auto!important;
 }
+#modal_settings_btn_selectPathDownload{
+	margin-bottom: 10px;
+}

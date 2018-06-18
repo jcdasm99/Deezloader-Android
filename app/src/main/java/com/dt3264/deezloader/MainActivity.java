@@ -18,6 +18,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
@@ -38,10 +39,6 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.widget.Toast;
 
-import com.obsez.android.lib.filechooser.ChooserDialog;
-import com.obsez.android.lib.filechooser.internals.FileUtil;
-import com.snatik.storage.Storage;
-
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -50,6 +47,7 @@ import java.util.List;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 import io.socket.emitter.Emitter;
+import vcm.github.webkit.proview.ProWebView;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -62,23 +60,23 @@ public class MainActivity extends AppCompatActivity {
 
     //We just want one instance of node running in the background.
     public static boolean _startedNodeAlready = false;
-    WebView mWebView;
+    //WebView mWebView;
     Socket socket;
     String nodeDir;
     SharedPreferences sharedPreferences;
-    Storage storage;
+    ProWebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
-        mWebView = findViewById(R.id.webView);
-        WebSettings webSettings = mWebView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
+        webView = findViewById(R.id.webView);
+        webView.setActivity(this);
+        //this is the most ugly loading bar you can find :D
+        webView.loadHtml("<html><head><style>html{text-align: center;}</style><head><body><p>Starting server</p><div class=\"lds-css ng-scope\"><div style=\"width:100%;height:100%; position:fixed;top: 10%;left: 50%; margin-left: -6em;\" class=\"lds-eclipse\"><div></div></div><style type=\"text/css\">@keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}@-webkit-keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}.lds-eclipse {position: relative;}.lds-eclipse div {position: absolute;-webkit-animation: lds-eclipse 1s linear infinite;animation: lds-eclipse 1s linear infinite;width: 160px;height: 160px;top: 20px;left: 20px;border-radius: 50%;box-shadow: 0 4px 0 0 #030303;-webkit-transform-origin: 80px 82px;transform-origin: 80px 82px;}.lds-eclipse {width: 200px !important;height: 200px !important;-webkit-transform: translate(-100px, -100px) scale(1) translate(100px, 100px);transform: translate(-100px, -100px) scale(1) translate(100px, 100px);}</style></div><body></html> ");
         createNotificationChannel();
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        storage = new Storage(getApplicationContext());
         if (savedInstanceState == null) {
             compruebaPermisos();
         }
@@ -94,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void iniciaServidor() {
-        mWebView.setWebViewClient(new HelloWebViewClient());
-        mWebView.setWebChromeClient(new WebChromeClient());
         if (!_startedNodeAlready) {
             _startedNodeAlready = true;
             new Thread(new Runnable() {
@@ -162,7 +158,11 @@ public class MainActivity extends AppCompatActivity {
         socket.on("progressData", new Emitter.Listener() {
             @Override
             public void call(Object... args) {
-                Integer progress = (Integer) args[0];
+                Integer progress = 0;
+                try {
+                    progress = (Integer) args[0];
+                }
+                catch(NullPointerException e){}
                 notificaDescarga(progress);
             }
         });
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getBaseContext(), CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_notification)
                 .setContentTitle(songName!=null ? ("Downloading: " + songName) : "Getting track info")
-                .setSubText(progress + "%")
+                .setSubText(progress > 0 ? progress + "%" : "")
                 .setProgress(100, progress, (progress==0))
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
@@ -355,34 +355,6 @@ public class MainActivity extends AppCompatActivity {
         }, 2000);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 100: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // permission was granted, yay!
-                    iniciaServidor();
-
-                } else {
-                    // permission denied, boo!
-                    Toast.makeText(this, "You should give the permission to use the app", Toast.LENGTH_SHORT).show();
-                    this.finish();
-                }
-            }
-        }
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        if (resultCode == RESULT_OK && requestCode == 1234){
-            Uri treeUri = resultData.getData();
-            sharedPreferences.edit().putString(SHARED_PREFS_NEW_PATH, treeUri.toString()).apply();
-            String realPath = treeUri.getPath().replace("tree", "storage").replace(":", "/");
-            if(!realPath.endsWith("/")) realPath+="/";
-            socket.emit("newPath", realPath);
-        }
-    }
-
     public void copyFile(String inputPath, String inputFile, String outputPath, DocumentFile pickedDir) {
 
         InputStream in = null;
@@ -421,34 +393,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class HelloWebViewClient extends WebViewClient {
-        ProgressDialog progressBar = ProgressDialog.show(MainActivity.this, "Loading", "Please wait...");
-
-        @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
-            view.loadUrl(url);
-            return true;
-        }
-
-        @Override
-        public void onPageFinished(WebView view, String url) {
-            if (progressBar.isShowing()) {
-                progressBar.dismiss();
-            }
-        }
-    }
-
     @Override
-    protected void onSaveInstanceState(Bundle bundle) {
-        super.onSaveInstanceState(bundle);
-        mWebView.saveState(bundle);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        webView.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == 1234){
+            Uri treeUri = data.getData();
+            sharedPreferences.edit().putString(SHARED_PREFS_NEW_PATH, treeUri.toString()).apply();
+            String realPath = treeUri.getPath().replace("tree", "storage").replace(":", "/");
+            if(!realPath.endsWith("/")) realPath+="/";
+            socket.emit("newPath", realPath);
+        }
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mWebView.restoreState(savedInstanceState);
-        //muestraPagina();
+        webView.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        webView.onRequestPermissionResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 100: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay!
+                    iniciaServidor();
+
+                } else {
+                    // permission denied, boo!
+                    Toast.makeText(this, "You should give the permission to use the app", Toast.LENGTH_SHORT).show();
+                    this.finish();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        webView.onSavedInstanceState(outState);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        webView.onDestroy();
     }
 
     /**

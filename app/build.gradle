@@ -7,8 +7,8 @@ android {
         applicationId "com.dt3264.deezloader"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 7
-        versionName "1.1.5"
+        versionCode 8
+        versionName "1.1.6"
         archivesBaseName = "DeezLoader-$versionName"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -69,7 +69,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation ('io.socket:socket.io-client:0.9.0') {
         // excluding org.json which is provided by Android
         exclude group: 'org.json', module: 'json'
@@ -79,9 +79,7 @@ dependencies {
     }
     releaseImplementation('com.github.ajitsing:sherlock-no-op:1.0.4@aar')
 
-    implementation 'com.github.hedzr:android-file-chooser:master-SNAPSHOT'
-
-    implementation 'com.snatik:storage:2.1.0'
+    implementation 'com.github.vic797:prowebview:2.2'
 
     testImplementation 'junit:junit:4.12'
 }
