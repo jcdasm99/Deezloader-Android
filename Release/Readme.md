@@ -1,6 +1,7 @@
 # DeezLoader For Android 
 
-# Version 1.1.4 (Lastest version)
+# Version 1.1.6 (Lastest version)
+#### Min android required version: Android 5(Lollipop)
 
 # arm (This should work in most of the devices, size of 15mb)
 [DeezLoader-1.1.6-armeabi-v7a.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.6-armeabi-v7a-debug.apk)

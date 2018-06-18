@@ -11,6 +11,7 @@ Now you can forget of the termux methodto run this tool, just download the [apk]
 
 # Download  (Lastest: 1.1.6)
 - Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release)
+#### Min android required version: Android 5(Lollipop)
 
 # Crashes
 
