@@ -3,15 +3,19 @@
 # Version 1.1.4 (Lastest version)
 
 # arm (This should work in most of the devices, size of 15mb)
-[DeezLoader-1.1.4-armeabi-v7a.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.4-armeabi-v7a-debug.apk)
+[DeezLoader-1.1.4-armeabi-v7a.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.5-armeabi-v7a-debug.apk)
 
 # x86 (In case the arm doesn't work for you, size of 15mb)
-[DeezLoader-1.1.4-x86.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.4-x86-debug.apk)
+[DeezLoader-1.1.5-x86.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.5-x86-debug.apk)
 
 # General (This should work on all devices, but size of 38mb)
-[DeezLoader-1.1.4-General.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.4-General-debug.apk)
+[DeezLoader-1.1.5-General.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.5-General-debug.apk)
 
 # Changelog
+
+- 1.1.5
+    - Added option to select another download path (in fact, it still download it to the default storage but if another folder has been selected, the app automaticaly move the file to the selected folder when the download has been completed)
+
 - 1.1.4
     - Added notification on download canceled
     - Added notification when a song is already downloaded
