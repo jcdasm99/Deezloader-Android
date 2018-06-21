@@ -58,7 +58,7 @@
 			<div class="footer-copyright">
 				<div class="container">
 					&copy; Deezloader original code by <a class="white-text" href="https://boerse.to/members/zzmtv.3378614/">ZzMTV</a>.
-					Currently maintained by <a class="white-text" href="https://www.reddit.com/user/ExtendLord/">ExtendLord</a>.
+					Maintained in the past by <a class="white-text" href="https://www.reddit.com/user/ExtendLord/">ExtendLord</a>.
 				</div>
 			</div>
 		</footer>
@@ -112,7 +112,7 @@
 		<div class="row">
 			<div class="input-field col s12">
 				<i class="material-icons prefix">label</i>
-				<input type="text" id="modal_settings_input_downloadTracksLocation"/>
+				<input type="text" id="modal_settings_input_downloadTracksLocation" disabled/>
 				<label for="modal_settings_input_downloadTracksLocation">Download location</label>
 			</div>
 		</div>
@@ -126,19 +126,19 @@
 		</div>
 		<div class="row">
 			<div class="col s6">
-				<input type="checkbox" id="modal_settings_cbox_createM3UFile" class="filled-in"/>
-				<label for="modal_settings_cbox_createM3UFile">Create M3U (Playlist) file</label>
-			</div>
-			<div class="col s6">
-				<input type="checkbox" id="modal_settings_cbox_createArtistFolder" class="filled-in"/>
+				<input type="checkbox" id="modal_settings_cbox_createArtistFolder" class="filled-in" onchange=""/>
 				<label for="modal_settings_cbox_createArtistFolder">Create artist folder</label>
             </div>
-        </div>
-        <div class="row">
 			<div class="col s6">
 				<input type="checkbox" id="modal_settings_cbox_createAlbumFolder" class="filled-in"/>
 				<label for="modal_settings_cbox_createAlbumFolder">Create album folder</label>
 			</div>
+        </div>
+        <div class="row">
+			<div class="col s6">
+				<input type="checkbox" id="modal_settings_cbox_createM3UFile" class="filled-in" onchange=""/>
+				<label for="modal_settings_cbox_createM3UFile">Create M3U (playlist) file</label>
+            </div>
 			<div class="col s6">
 				<input type="checkbox" id="modal_settings_cbox_hifi" class="filled-in"/>
 				<label for="modal_settings_cbox_hifi">Enable HIFI</label>
@@ -712,13 +712,6 @@
 				</div>
 			</div>
 			<table id="tab_charts_table_charts" class="highlight row">
-				<thead>
-				<tr>
-					<td><!--cover--></td>
-					<td><!--data--></td>
-					<td><!--download_link--></td>
-				</tr>
-				</thead>
 				<tbody id="tab_charts_table_charts_tbody_loadingIndicator">
 				<tr>
 					<td colspan="7" class="center">

@@ -127,12 +127,51 @@ $('#modal_settings_btn_selectPathDownload').on('click', function () {
 });
 var actualPathToShow = null;
 socket.on('newPath', function(newPath){
-	actualPathToShow = newPath
+	actualPathToShow = newPath;
+	let settings = {};
+	// Save
+	settings.userDefined = {
+		trackNameTemplate: $('#modal_settings_input_trackNameTemplate').val(),
+		playlistTrackNameTemplate: $('#modal_settings_input_playlistTrackNameTemplate').val(),
+		albumNameTemplate: $('#modal_settings_input_albumNameTemplate').val(),
+		createM3UFile: $('#modal_settings_cbox_createM3UFile').is(':checked'),
+		createArtistFolder: false,
+		createAlbumFolder: false,
+		downloadLocation: "/storage/emulated/0/Music",
+		artworkSize: $('#modal_settings_select_artworkSize').val(),
+		hifi: $('#modal_settings_cbox_hifi').is(':checked'),
+		padtrck: $('#modal_settings_cbox_padtrck').is(':checked'),
+		syncedlyrics: $('#modal_settings_cbox_syncedlyrics').is(':checked'),
+		numplaylistbyalbum: $('#modal_settings_cbox_numplaylistbyalbum').is(':checked')
+	};
+	// Send updated settings to be saved into config file
+	socket.emit('saveSettings', settings);
+	socket.emit("getUserSettings");
 });
 
 $('#modal_settings_btn_defaultPathDownload').click(function(){
-	socket.emit("useDefaultPath");
+	let settings = {};
+	// Save
+	settings.userDefined = {
+		trackNameTemplate: $('#modal_settings_input_trackNameTemplate').val(),
+		playlistTrackNameTemplate: $('#modal_settings_input_playlistTrackNameTemplate').val(),
+		albumNameTemplate: $('#modal_settings_input_albumNameTemplate').val(),
+		createM3UFile: $('#modal_settings_cbox_createM3UFile').is(':checked'),
+		createArtistFolder: $('#modal_settings_cbox_createArtistFolder').is(':checked'),
+		createAlbumFolder: $('#modal_settings_cbox_createAlbumFolder').is(':checked'),
+		downloadLocation: "/storage/emulated/0/Music/",
+		artworkSize: $('#modal_settings_select_artworkSize').val(),
+		hifi: $('#modal_settings_cbox_hifi').is(':checked'),
+		padtrck: $('#modal_settings_cbox_padtrck').is(':checked'),
+		syncedlyrics: $('#modal_settings_cbox_syncedlyrics').is(':checked'),
+		numplaylistbyalbum: $('#modal_settings_cbox_numplaylistbyalbum').is(':checked')
+	};
+	
 	actualPathToShow = null;
+	socket.emit("useDefaultPath");
+	// Send updated settings to be saved into config file
+	socket.emit('saveSettings', settings);
+	socket.emit("getUserSettings");
 });
 
 // Save settings button
@@ -147,7 +186,7 @@ $('#modal_settings_btn_saveSettings').click(function () {
 		createM3UFile: $('#modal_settings_cbox_createM3UFile').is(':checked'),
 		createArtistFolder: $('#modal_settings_cbox_createArtistFolder').is(':checked'),
 		createAlbumFolder: $('#modal_settings_cbox_createAlbumFolder').is(':checked'),
-		downloadLocation: $('#modal_settings_input_downloadTracksLocation').val(),
+		downloadLocation: "/storage/emulated/0/Music",
 		artworkSize: $('#modal_settings_select_artworkSize').val(),
 		hifi: $('#modal_settings_cbox_hifi').is(':checked'),
 		padtrck: $('#modal_settings_cbox_padtrck').is(':checked'),
@@ -158,6 +197,22 @@ $('#modal_settings_btn_saveSettings').click(function () {
 	// Send updated settings to be saved into config file
 	socket.emit('saveSettings', settings);
 	socket.emit("getUserSettings");
+});
+
+//Create artist folder checkbox
+$('#modal_settings_cbox_createArtistFolder').change(function() {
+	if(actualPathToShow!==null){
+		this.checked=false;
+		message("Alert", "Create artist folder is only available for default path");
+	}
+});
+
+//Create album folder checkbox
+$('#modal_settings_cbox_createAlbumFolder').change(function() {
+	if(actualPathToShow!==null){
+		this.checked=false;
+		message("Alert", "Create album folder is only available for default path");
+	}
 });
 
 // Reset defaults button
@@ -200,7 +255,7 @@ function fillSettingsModal(settings) {
 	$('#modal_settings_cbox_padtrck').prop('checked', settings.padtrck);
 	$('#modal_settings_cbox_syncedlyrics').prop('checked', settings.syncedlyrics);
 	$('#modal_settings_cbox_numplaylistbyalbum').prop('checked', settings.numplaylistbyalbum);
-	$('#modal_settings_input_downloadTracksLocation').val( actualPathToShow===null? settings.downloadLocation: actualPathToShow);
+	$('#modal_settings_input_downloadTracksLocation').val( actualPathToShow===null? settings.downloadLocation : actualPathToShow);
 	$('#modal_settings_select_artworkSize').val(settings.artworkSize).material_select();
 
 	Materialize.updateTextFields()
@@ -681,19 +736,21 @@ socket.on("getChartsTrackListByCountry", function (data) {
 	for (var i = 0; i < data.tracks.length; i++) {
 
 		currentChartTrack = data.tracks[i];
-
+		//small screen
+		if(i%2==0)$(chartsTableBody).append("<div class='row'>");
 		$(chartsTableBody).append(
-				'<tr>' +
-				'<td><p><img src="' + currentChartTrack['album']['cover_small'] + '" class="circle" /></p></td>' +
-                "<td class='centrado'>No." + (i + 1) + '</br>' +
-                currentChartTrack['title'] + '</br>' +
-				'' + currentChartTrack['artist']['name'] + '</br>' +
-				'' + currentChartTrack['album']['title'] + '</br>' +
-				'' + convertDuration(currentChartTrack['duration']) + '</bt>' +
+				'<tr class="col s6">' +
+				'<td class="centrado centerCol"><p><img src="' + currentChartTrack['album']['cover_small'] + '" class="circle" /></p>' +
+                "<p class='center-align'>No." + (i + 1) + '</p>' +
+                '<p class="center-align">' + currentChartTrack['title'] + '</p>' +
+				'<p class="center-align">' + currentChartTrack['artist']['name'] + '</p>' +
+				'<p class="center-align">' + currentChartTrack['album']['title'] + '</p>' +
+				'<p class="center-align">' + convertDuration(currentChartTrack['duration']) + '</p>' +
                 '</td>' +
 				'</tr>');
-		generateDownloadLink(currentChartTrack['link']).appendTo(chartsTableBody.children('tr:last')).wrap('<td class="centrado">');
-
+		generateDownloadLink(currentChartTrack['link']).appendTo(chartsTableBody.children().children('td:last')).wrap('<p>');
+		if(i%2==1)$(chartsTableBody).append("</div>");
+		
 	}
 
 	$('#tab_charts_table_charts_tbody_loadingIndicator').addClass('hide');

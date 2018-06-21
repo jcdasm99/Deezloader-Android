@@ -15,6 +15,12 @@
 
 # Changelog
 
+- 1.1.7
+    - For better experience, if the download folder is diferent to the default, the "create album/artist folder" are dissabled (the songs doesn't download if at least one of those options are selected). Thanks to Milo Joseph for help finding this bug :D
+    - Charts tab redesigned
+    - Start loading screen improved for better understeand of what is being done while the app starts
+    - Updated method to make android recognice new songs downloaded to the external storage propelly
+
 - 1.1.6
     - Replaced the webView with a better implementation of itself which is more stable at the time of showing the page
     - Fixed a bug that crashed the app if the progress of a download isn't valid

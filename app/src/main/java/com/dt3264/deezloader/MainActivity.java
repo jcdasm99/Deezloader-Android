@@ -27,6 +27,7 @@ import android.support.v4.os.EnvironmentCompat;
 import android.support.v4.provider.DocumentFile;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -42,7 +43,10 @@ import android.widget.Toast;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -60,11 +64,13 @@ public class MainActivity extends AppCompatActivity {
 
     //We just want one instance of node running in the background.
     public static boolean _startedNodeAlready = false;
-    //WebView mWebView;
-    Socket socket;
+    static Socket socket;
     String nodeDir;
     SharedPreferences sharedPreferences;
     ProWebView webView;
+    String SHARED_PREFS_NEW_PATH = "newPath";
+    Context context;
+    String internalPath, songName, fileName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,13 +79,18 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         webView = findViewById(R.id.webView);
         webView.setActivity(this);
-        //this is the most ugly loading bar you can find :D
-        webView.loadHtml("<html><head><style>html{text-align: center;}</style><head><body><p>Starting server</p><div class=\"lds-css ng-scope\"><div style=\"width:100%;height:100%; position:fixed;top: 10%;left: 50%; margin-left: -6em;\" class=\"lds-eclipse\"><div></div></div><style type=\"text/css\">@keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}@-webkit-keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}.lds-eclipse {position: relative;}.lds-eclipse div {position: absolute;-webkit-animation: lds-eclipse 1s linear infinite;animation: lds-eclipse 1s linear infinite;width: 160px;height: 160px;top: 20px;left: 20px;border-radius: 50%;box-shadow: 0 4px 0 0 #030303;-webkit-transform-origin: 80px 82px;transform-origin: 80px 82px;}.lds-eclipse {width: 200px !important;height: 200px !important;-webkit-transform: translate(-100px, -100px) scale(1) translate(100px, 100px);transform: translate(-100px, -100px) scale(1) translate(100px, 100px);}</style></div><body></html> ");
+        webView.loadHtml(getHTML("Prepairing"));
         createNotificationChannel();
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
-        if (savedInstanceState == null) {
-            compruebaPermisos();
-        }
+        if (savedInstanceState == null) compruebaPermisos();
+        else muestraPagina();
+        Intent startIntent = new Intent(getApplicationContext(), MyService.class);
+        startIntent.setAction(getString(R.string.serviceName));
+        startService(startIntent);
+    }
+
+    String getHTML(String txt){
+        return "<html><head><style>html{text-align: center;}</style><head><body><p>" + txt + "</p><div class=\"lds-css ng-scope\"><div style=\"width:100%;height:100%; position:fixed;top: 10%;left: 50%; margin-left: -6em;\" class=\"lds-eclipse\"><div></div></div><style type=\"text/css\">@keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}@-webkit-keyframes lds-eclipse {0% {-webkit-transform: rotate(0deg);transform: rotate(0deg);}50% {-webkit-transform: rotate(180deg);transform: rotate(180deg);}100% {-webkit-transform: rotate(360deg);transform: rotate(360deg);}}.lds-eclipse {position: relative;}.lds-eclipse div {position: absolute;-webkit-animation: lds-eclipse 1s linear infinite;animation: lds-eclipse 1s linear infinite;width: 160px;height: 160px;top: 20px;left: 20px;border-radius: 50%;box-shadow: 0 4px 0 0 #030303;-webkit-transform-origin: 80px 82px;transform-origin: 80px 82px;}.lds-eclipse {width: 200px !important;height: 200px !important;-webkit-transform: translate(-100px, -100px) scale(1) translate(100px, 100px);transform: translate(-100px, -100px) scale(1) translate(100px, 100px);}</style></div><p>If the app keeps only in 'Prepairing' for too long, restart the app</p><body></html>";
     }
 
     void compruebaPermisos(){
@@ -93,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
 
     void iniciaServidor() {
         if (!_startedNodeAlready) {
-            _startedNodeAlready = true;
+            preparaNodeServerListeners();
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -105,7 +116,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             }).start();
-            preparaNodeServerListeners();
+            webView.loadHtml(getHTML("Starting server"));
+            _startedNodeAlready = true;
         } else {
             muestraPagina();
         }
@@ -177,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             public void call(Object... args) {
                 internalPath = (String) args[0];
                 songName = (String) args[1];
-                fileName = internalPath.substring(internalPath.lastIndexOf("/")+1);
+                fileName = internalPath.replace("/storage/emulated/0/Music/","");
             }
         });
         socket.on("cancelDownload", new Emitter.Listener() {
@@ -211,6 +223,10 @@ public class MainActivity extends AppCompatActivity {
                     getContentResolver().takePersistableUriPermission(treeUri, Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     //Copy file with dir with permissions given
                     copyFile("/storage/emulated/0/Music/", fileName, fileName, pickedDir);
+                    //log the copy
+                    String realPath = treeUri.getPath().replace("tree", "storage").replace(":", "/");
+                    if(!realPath.endsWith("/")) realPath+="/";
+                    socket.emit("log", "From" + "/storage/emulated/0/Music/" + fileName + " to " + realPath + fileName);
                     //delete source file after the copy was completed
                     internalFile = new File(internalPath);
                     internalFile.delete();
@@ -236,25 +252,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void scanNewSongExternal(File externalFile){
-        MediaScannerConnection.scanFile(getBaseContext(), new String[] { externalFile.toString() }, null, new MediaScannerConnection.OnScanCompletedListener() {
+        /*MediaScannerConnection.scanFile(getBaseContext(), new String[] { externalFile.toString() }, null, new MediaScannerConnection.OnScanCompletedListener() {
             public void onScanCompleted(String path, Uri uri) {
-                Log.i("ExternalStorage", "Scanned " + path + ":");
-                Log.i("ExternalStorage", "-> uri=" + uri);
+                //Log.i("ExternalStorage", "Scanned " + path + ":");
+                //Log.i("ExternalStorage", "-> uri=" + uri);
             }
-        });
+        });*/
+        new MediaScannerWrapper(context, externalFile.toString()).scan();
+
     }
-
-    String SHARED_PREFS_NEW_PATH = "newPath";
-
-    Context context;
-    String internalPath, songName, fileName;
 
     void muestraPagina() {
         context = this;
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                WebView webView = findViewById(R.id.webView);
+                ProWebView webView = findViewById(R.id.webView);
                 webView.loadUrl("http://localhost:1730/");
             }
         });
@@ -287,7 +300,6 @@ public class MainActivity extends AppCompatActivity {
                 .setSmallIcon(R.mipmap.ic_notification)
                 .setContentTitle("Already downloaded: " + song)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
         mBuilder.setOnlyAlertOnce(true);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
@@ -373,8 +385,12 @@ public class MainActivity extends AppCompatActivity {
             if(outputPath.endsWith("mp3")) file = pickedDir.createFile("audio/mpeg3", outputPath);
             else file = pickedDir.createFile("audio/flac", outputPath);
             out = getContentResolver().openOutputStream(file.getUri());
-
-            copyFile(in, out);
+            try {
+                copyFile(in, out);
+            }
+            catch (IOException e){
+                socket.emit("log", "IOException: " + e.getMessage());
+            }
             in.close();
 
 
@@ -387,9 +403,11 @@ public class MainActivity extends AppCompatActivity {
         catch (FileNotFoundException fnfe1) {
             /* I get the error here */
             Log.e("tag", fnfe1.getMessage());
+            socket.emit("log", "FileNotFoundException: " + fnfe1.getMessage());
         }
         catch (Exception e) {
             Log.e("tag", e.getMessage());
+            socket.emit("log", "Exception: " + e.getMessage());
         }
     }
 
@@ -436,12 +454,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         webView.onSavedInstanceState(outState);
+        //iniciaServidor();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         webView.onDestroy();
+        //_startedNodeAlready=false;
     }
 
     /**
@@ -452,6 +472,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkIsApkUpdated(){
         if (wasAPKUpdated()) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ProWebView webView = findViewById(R.id.webView);
+                    webView.loadHtml(getHTML("Prepairing server files"));
+                }
+            });
             //Recursively delete any existing nodejs-project.
             File nodeDirReference = new File(nodeDir);
             if (nodeDirReference.exists()) {
@@ -544,6 +571,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } catch (Exception e) {
             e.printStackTrace();
+
             return false;
         }
     }
@@ -553,6 +581,35 @@ public class MainActivity extends AppCompatActivity {
         int read;
         while ((read = in.read(buffer)) != -1) {
             out.write(buffer, 0, read);
+        }
+    }
+    public class MediaScannerWrapper implements MediaScannerConnection.MediaScannerConnectionClient {
+        private MediaScannerConnection mConnection;
+        private String mPath;
+        private String mMimeType;
+
+        // filePath - where to scan;
+        // mime type of media to scan i.e. "image/jpeg".
+        // use "*/*" for any media
+        public MediaScannerWrapper(Context _ctx, String _filePath){
+            mPath = _filePath;
+            mMimeType = "*/*";
+            mConnection = new MediaScannerConnection(_ctx, this);
+        }
+
+        // do the scanning
+        public void scan() {
+            mConnection.connect();
+        }
+
+        // start the scan when scanner is ready
+        public void onMediaScannerConnected() {
+            mConnection.scanFile(mPath, mMimeType);
+            Log.w("MediaScannerWrapper", "media file scanned: " + mPath);
+        }
+
+        public void onScanCompleted(String path, Uri uri) {
+            // when scan is completes, update media file tags
         }
     }
 }

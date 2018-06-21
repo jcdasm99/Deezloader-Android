@@ -179,6 +179,7 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.emit("newPath", newPath);
 	});
 	socket.on("login", function (username, password, autologin) {
+		io.sockets.emit("checkIfHasNewPath");
 		Deezer.init(username, password, function (err) {
 			if(err){
 				socket.emit("login", err.message);
@@ -195,10 +196,12 @@ io.sockets.on('connection', function (socket) {
 					});
 				}
 				socket.emit("login", "none");
-				io.sockets.emit("checkIfHasNewPath");
 				Deezer.logs('Info',"Logged in successfully");
 			}
 		});
+	});
+	socket.on('log', function(a){
+		Deezer.logs("Copy of file", a);
 	});
 	socket.on("autologin", function(){
 		fs.readFile(autologinLocation, function(err, data){
@@ -1229,7 +1232,7 @@ io.sockets.on('connection', function (socket) {
 								fs.remove(tempPath);
 							}
 							if(metadata.imagePath){
-								fs.remove(metadata.imagePath);
+								//fs.remove(metadata.imagePath);
 							}
 							io.sockets.emit("downloadReady", "ready");
 							callback();
