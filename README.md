@@ -18,7 +18,7 @@ Now you can forget of the termux methodto run this tool, just download the [apk]
 
 # Crashes
 
-In case there's a crash in the app, a notification will be displayed, open it and send it to the following mail "cernadaniel32@gmail.com" to keep improving the app.
+In case there's a crash in the app, a notification will be displayed, open it and send it to the following mail "cernadaniel32@gmail.com" or to [this telegram group](https://t.me/joinchat/EPuiFwzIphPHwMn8BC8HEA) to keep improving the app.
 
 # Credits
 ## Original Developer
