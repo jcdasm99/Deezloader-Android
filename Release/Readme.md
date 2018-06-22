@@ -4,16 +4,19 @@
 ##### Min android required version: Android 5 (Lollipop)
 ##### Versión mínima de android requerida: Android 5 (Lollipop)
 
-### arm (This should work in most of the devices, size of 15mb / Esta versión debe funcionar en la mayoría de dispositivos)
-[DeezLoader-1.1.7-armeabi-v7a.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.7-armeabi-v7a-debug.apk)
+### Option 1: arm (This should work in most of the devices, size of 15mb / Esta versión debe funcionar en la mayoría de dispositivos)
+[DeezLoader-1.1.8-armeabi-v7a.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.8-armeabi-v7a-debug.apk)
 
-### x86 (In case the arm doesn't work for you, size of 15mb / Por si la versión arm no te sirvió)
-[DeezLoader-1.1.7-x86.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.7-x86-debug.apk)
+### Option 2: x86 (In case the arm doesn't work for you, size of 15mb / Por si la versión arm no te sirvió)
+[DeezLoader-1.1.8-x86.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.8-x86-debug.apk)
 
-### General (This should work on all devices, but size of 38mb / Esta versión devería funcionar en todos los dispositivos)
-[DeezLoader-1.1.7-General.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.7-General-debug.apk)
+### Option 3: General (This should work on all devices, but size of 38mb / Esta versión devería funcionar en todos los dispositivos)
+[DeezLoader-1.1.8-General.apk](https://gitlab.com/DT3264/DeezLoader-Android/raw/master/Release/DeezLoader-1.1.8-General-debug.apk)
 
 # Changelog
+
+- 1.1.8
+    - Fixed a bug where the app randomly crashed when a song has been downloaded
 
 - 1.1.7
     - For better experience, if the download folder is diferent to the default, the "create album/artist folder" are dissabled (the songs doesn't download if at least one of those options are selected). Thanks to Milo Joseph for help finding this bug :D

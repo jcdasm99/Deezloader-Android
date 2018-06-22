@@ -196,8 +196,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void call(Object... args) {
                 notificaDescargaCancelada();
-                internalPath = null;
-                songName = null;
+                //internalPath = null;
+                //songName = null;
             }
         });
         socket.on("alreadyDownloaded", new Emitter.Listener() {
@@ -205,8 +205,8 @@ public class MainActivity extends AppCompatActivity {
             public void call(Object... args) {
                 String song = (String) args[0];
                 notificaYaDescargado(song);
-                internalPath = null;
-                songName = null;
+                //internalPath = null;
+                //songName = null;
             }
         });
         socket.on("downloadReady", new Emitter.Listener() {
@@ -238,8 +238,8 @@ public class MainActivity extends AppCompatActivity {
                     internalFile = new File(internalPath);
                     scanNewSongInternal(Uri.fromFile(internalFile));
                 }
-                internalPath = null;
-                songName = null;
+                //internalPath = null;
+                //songName = null;
             }
         });
         socket.connect();

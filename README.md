@@ -11,8 +11,10 @@ Now you can forget of the termux methodto run this tool, just download the [apk]
 - Same as the desktop version
 - But adapted for the small screens
 
-# Download  (Lastest: 1.1.7)
+# Downloads  (Lastest: 1.1.8)
 - Always download the last release [here](https://gitlab.com/DT3264/DeezLoader-Android/tree/master/Release) 
+
+- P.D: I don't keep links to previous versions since it's easier to have the lastest version online for you)
 
 ##### Min android required version: Android 5(Lollipop)
 

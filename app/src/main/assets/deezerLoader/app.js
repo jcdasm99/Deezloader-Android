@@ -164,6 +164,10 @@ io.sockets.on('connection', function (socket) {
 		io.sockets.emit("requestNewPath");
 	});
 	socket.on('newPath', function(path){
+		let settings = configFile.userDefined;
+		if (!settings.downloadLocation) {
+			settings.downloadLocation = mainFolder;
+		}
 		io.sockets.emit('newPath', path)
 	});
 	socket.on('sendProgress', function(progress){
@@ -204,6 +208,7 @@ io.sockets.on('connection', function (socket) {
 		Deezer.logs("Copy of file", a);
 	});
 	socket.on("autologin", function(){
+		io.sockets.emit("checkIfHasNewPath");
 		fs.readFile(autologinLocation, function(err, data){
 			if(err){
 				Deezer.logs('Info',"No auto login found");

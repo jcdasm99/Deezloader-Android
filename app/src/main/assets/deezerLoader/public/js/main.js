@@ -128,25 +128,6 @@ $('#modal_settings_btn_selectPathDownload').on('click', function () {
 var actualPathToShow = null;
 socket.on('newPath', function(newPath){
 	actualPathToShow = newPath;
-	let settings = {};
-	// Save
-	settings.userDefined = {
-		trackNameTemplate: $('#modal_settings_input_trackNameTemplate').val(),
-		playlistTrackNameTemplate: $('#modal_settings_input_playlistTrackNameTemplate').val(),
-		albumNameTemplate: $('#modal_settings_input_albumNameTemplate').val(),
-		createM3UFile: $('#modal_settings_cbox_createM3UFile').is(':checked'),
-		createArtistFolder: false,
-		createAlbumFolder: false,
-		downloadLocation: "/storage/emulated/0/Music",
-		artworkSize: $('#modal_settings_select_artworkSize').val(),
-		hifi: $('#modal_settings_cbox_hifi').is(':checked'),
-		padtrck: $('#modal_settings_cbox_padtrck').is(':checked'),
-		syncedlyrics: $('#modal_settings_cbox_syncedlyrics').is(':checked'),
-		numplaylistbyalbum: $('#modal_settings_cbox_numplaylistbyalbum').is(':checked')
-	};
-	// Send updated settings to be saved into config file
-	socket.emit('saveSettings', settings);
-	socket.emit("getUserSettings");
 });
 
 $('#modal_settings_btn_defaultPathDownload').click(function(){
